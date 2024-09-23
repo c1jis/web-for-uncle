@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شركة هندسية - إدارة البيوت والمصاريف</title>
+    <style>
+        /* إعدادات الصفحة الرئيسية */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #001f3f 30%, #0074D9 90%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* إعدادات الحاوية */
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            background-color: #111;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.4);
+        }
+
+        /* إعدادات العنوان */
+        h1 {
+            text-align: center;
+            color: #FFD700;
+        }
+
+        /* إعدادات النماذج */
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #FFD700;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* إعدادات الأزرار */
+        button {
+            background-color: #FFD700;
+            color: #111;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ffcc00;
+        }
+
+        /* إعدادات قائمة البيوت */
+        .house-list {
+            margin-top: 20px;
+        }
+
+        /* تصميم عناصر البيوت */
+        .house-item {
+            display: flex;
+            justify-content: space-between;
+            background-color: #001f3f;
+            padding: 10px;
+            border: 1px solid #0074D9;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        /* إعدادات البحث */
+        #search-form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            background-color: #111;
+            color: #FFD700;
+            border: 1px solid #FFD700;
+        }
+
+        /* إعدادات التفاصيل */
+        .house-details {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #0074D9;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>إدارة البيوت والمصاريف</h1>
+
+    <!-- Form to add houses -->
+    <form id="house-form">
+        <label for="house-name">اسم البيت:</label>
+        <input type="text" id="house-name" placeholder="أدخل اسم البيت" required>
+        
+        <label for="house-expense">المصروف:</label>
+        <input type="number" id="house-expense" placeholder="أدخل المصروف" required>
+
+        <button type="submit">إضافة البيت</button>
+    </form>
+
+    <!-- Search Form -->
+    <form id="search-form">
+        <input type="text" id="search-input" placeholder="ابحث عن اسم البيت">
+    </form>
+
+    <!-- List of houses -->
+    <div class="house-list" id="house-list"></div>
+
+    <!-- House details -->
+    <div class="house-details" id="house-details">
+        <h2>تفاصيل البيت</h2>
+        <p><strong>اسم البيت:</strong> <span id="detail-name"></span></p>
+        <p><strong>المصروف:</strong> <span id="detail-expense"></span> دينار عراقي</p>
+        <p><strong>تاريخ الإضافة:</strong> <span id="detail-date"></span></p>
+    </div>
+</div>
+
+<script>
+// Array to store houses
+let houses = [];
+
+// Function to add a new house
+document.getElementById('house-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('house-name').value;
+    const expense = document.getElementById('house-expense').value;
+    const dateAdded = new Date().toLocaleDateString();
+
+    if (name && expense) {
+        houses.push({ name, expense, dateAdded });
+        displayHouses(houses);
+        document.getElementById('house-form').reset();
+    }
+});
+
+// Function to display houses
+function displayHouses(houseList) {
+    const houseListDiv = document.getElementById('house-list');
+    houseListDiv.innerHTML = '';
+
+    houseList.forEach((house, index) => {
+        const houseDiv = document.createElement('div');
+        houseDiv.classList.add('house-item');
+        houseDiv.innerHTML = `<span>${house.name}</span><span>${house.expense} دينار عراقي</span>`;
+        
+        houseDiv.addEventListener('click', function() {
+            showHouseDetails(house);
+        });
+
+        houseListDiv.appendChild(houseDiv);
+    });
+}
+
+// Function to search houses
+document.getElementById('search-input').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const filteredHouses = houses.filter(house => house.name.toLowerCase().includes(searchTerm));
+    displayHouses(filteredHouses);
+});
+
+// Function to show house details
+function showHouseDetails(house) {
+    document.getElementById('detail-name').textContent = house.name;
+    document.getElementById('detail-expense').textContent = house.expense;
+    document.getElementById('detail-date').textContent = house.dateAdded;
+    
+    document.getElementById('house-details').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
