@@ -26,6 +26,32 @@
             background-color: #111;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(255, 255, 0, 0.4);
+            display: none; /* إخفاء الحاوية الافتراضية */
+        }
+
+        /* إعدادات صفحة الترحيب */
+        .welcome-screen {
+            text-align: center;
+        }
+
+        .welcome-screen h1 {
+            color: #FFD700;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .welcome-screen button {
+            padding: 15px 30px;
+            font-size: 1.5em;
+            background-color: #FFD700;
+            color: #111;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .welcome-screen button:hover {
+            background-color: #ffcc00;
         }
 
         /* إعدادات العنوان */
@@ -129,7 +155,14 @@
 </head>
 <body>
 
-<div class="container">
+<!-- واجهة الترحيب -->
+<div class="welcome-screen">
+    <h1>مرحباً بك في شركتنا الهندسية</h1>
+    <button id="enter-button">أعمالي</button>
+</div>
+
+<!-- صفحة إدارة البيوت والمصاريف -->
+<div class="container" id="main-container">
     <h1>إدارة البيوت والمصاريف</h1>
 
     <!-- Form to add houses -->
@@ -161,6 +194,12 @@
 </div>
 
 <script>
+// إظهار الصفحة الرئيسية عند النقر على زر "أعمالي"
+document.getElementById('enter-button').addEventListener('click', function() {
+    document.querySelector('.welcome-screen').style.display = 'none';
+    document.getElementById('main-container').style.display = 'block';
+});
+
 // Array to store houses
 let houses = [];
 
