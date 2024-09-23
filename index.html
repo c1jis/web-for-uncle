@@ -21,7 +21,7 @@
         /* إعدادات الحاوية */
         .container {
             max-width: 600px;
-            width: 100%;
+            width: 90%;
             padding: 20px;
             background-color: #111;
             border-radius: 10px;
@@ -32,6 +32,7 @@
         h1 {
             text-align: center;
             color: #FFD700;
+            font-size: 2em;
         }
 
         /* إعدادات النماذج */
@@ -50,6 +51,7 @@
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            font-size: 1em;
         }
 
         /* إعدادات الأزرار */
@@ -100,6 +102,29 @@
             background-color: #0074D9;
             border-radius: 4px;
         }
+
+        /* استعلامات الوسائط لتحسين التجاوب */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            input, button {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 100%;
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.2em;
+            }
+            input, button {
+                font-size: 0.8em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -148,17 +173,17 @@ document.getElementById('house-form').addEventListener('submit', function(e) {
 
     if (name && expense) {
         houses.push({ name, expense, dateAdded });
-        displayHouses(houses);
+        displayAllHouses(); // عرض كل البيوت دائمًا
         document.getElementById('house-form').reset();
     }
 });
 
-// Function to display houses
-function displayHouses(houseList) {
+// Function to display all houses
+function displayAllHouses() {
     const houseListDiv = document.getElementById('house-list');
-    houseListDiv.innerHTML = '';
+    houseListDiv.innerHTML = ''; // نعيد تعيين القائمة لعرض كل البيوت
 
-    houseList.forEach((house, index) => {
+    houses.forEach((house) => {
         const houseDiv = document.createElement('div');
         houseDiv.classList.add('house-item');
         houseDiv.innerHTML = `<span>${house.name}</span><span>${house.expense} دينار عراقي</span>`;
@@ -175,8 +200,26 @@ function displayHouses(houseList) {
 document.getElementById('search-input').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();
     const filteredHouses = houses.filter(house => house.name.toLowerCase().includes(searchTerm));
-    displayHouses(filteredHouses);
+    displaySearchedHouses(filteredHouses);
 });
+
+// Function to display searched houses without clearing all houses
+function displaySearchedHouses(filteredHouses) {
+    const houseListDiv = document.getElementById('house-list');
+    houseListDiv.innerHTML = ''; // نظهر فقط النتائج
+
+    filteredHouses.forEach((house) => {
+        const houseDiv = document.createElement('div');
+        houseDiv.classList.add('house-item');
+        houseDiv.innerHTML = `<span>${house.name}</span><span>${house.expense} دينار عراقي</span>`;
+        
+        houseDiv.addEventListener('click', function() {
+            showHouseDetails(house);
+        });
+
+        houseListDiv.appendChild(houseDiv);
+    });
+}
 
 // Function to show house details
 function showHouseDetails(house) {
@@ -186,6 +229,9 @@ function showHouseDetails(house) {
     
     document.getElementById('house-details').style.display = 'block';
 }
+
+// Display all houses initially (for existing houses)
+displayAllHouses();
 </script>
 
 </body>
