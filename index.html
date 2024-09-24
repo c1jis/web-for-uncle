@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>شركة هندسية - إدارة البيوت والمصاريف</title>
     <style>
-        /* إعدادات الصفحة الرئيسية */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -14,11 +13,11 @@
             color: #fff;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            transition: background 0.5s ease;
         }
-
-        /* إعدادات الحاوية */
         .container {
             max-width: 600px;
             width: 90%;
@@ -26,42 +25,45 @@
             background-color: #111;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(255, 255, 0, 0.4);
-            display: none; /* إخفاء الحاوية الافتراضية */
+            display: none; 
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
-
-        /* إعدادات صفحة الترحيب */
+        .container.show {
+            display: block;
+            opacity: 1;
+        }
         .welcome-screen {
             text-align: center;
         }
-
         .welcome-screen h1 {
             color: #FFD700;
-            font-size: 3em;
+            font-size: 2.5em;
             margin-bottom: 20px;
+            transition: transform 0.3s;
         }
-
+        .welcome-screen h1:hover {
+            transform: scale(1.1);
+        }
         .welcome-screen button {
             padding: 15px 30px;
-            font-size: 1.5em;
+            font-size: 1.2em;
             background-color: #FFD700;
             color: #111;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
         }
-
         .welcome-screen button:hover {
             background-color: #ffcc00;
+            transform: translateY(-2px);
         }
-
-        /* إعدادات العنوان */
         h1 {
             text-align: center;
             color: #FFD700;
             font-size: 2em;
         }
-
-        /* إعدادات النماذج */
         form {
             margin-bottom: 20px;
         }
@@ -70,7 +72,6 @@
             margin-bottom: 8px;
             color: #FFD700;
         }
-
         input, button {
             width: 100%;
             padding: 10px;
@@ -78,118 +79,184 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 1em;
+            transition: border 0.3s;
         }
-
-        /* إعدادات الأزرار */
+        input:focus {
+            border-color: #FFD700;
+            outline: none;
+        }
         button {
             background-color: #FFD700;
             color: #111;
             font-weight: bold;
             cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
         }
-
         button:hover {
             background-color: #ffcc00;
+            transform: translateY(-2px);
         }
-
-        /* إعدادات قائمة البيوت */
         .house-list {
             margin-top: 20px;
-        }
-
-        /* تصميم عناصر البيوت */
-        .house-item {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+        }
+        .house-item {
             background-color: #001f3f;
             padding: 10px;
             border: 1px solid #0074D9;
             border-radius: 4px;
             margin-bottom: 10px;
             cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
         }
-
-        /* إعدادات البحث */
+        .house-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
         #search-form {
             margin-bottom: 20px;
         }
-
         input[type="text"] {
             background-color: #111;
             color: #FFD700;
             border: 1px solid #FFD700;
         }
-
-        /* إعدادات التفاصيل */
         .house-details {
             display: none;
             margin-top: 20px;
             padding: 10px;
             background-color: #0074D9;
             border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .house-details.show {
+            display: block;
+            opacity: 1;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            color: #111;
+            animation: slideIn 0.5s ease;
+            width: 90%;
+            max-width: 400px;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        /* استعلامات الوسائط لتحسين التجاوب */
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
+            .welcome-screen h1 {
+                font-size: 2em;
+            }
+            .welcome-screen button {
+                font-size: 1em;
+            }
             h1 {
                 font-size: 1.5em;
             }
             input, button {
                 font-size: 0.9em;
             }
-        }
-
-        @media (max-width: 480px) {
             .container {
-                width: 100%;
                 padding: 10px;
             }
-            h1 {
-                font-size: 1.2em;
+        }
+
+        /* تحركات جديدة لجعل التفاعل أكثر جاذبية */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
             }
-            input, button {
-                font-size: 0.8em;
+            to {
+                opacity: 1;
             }
         }
+
     </style>
 </head>
 <body>
 
-<!-- واجهة الترحيب -->
-<div class="welcome-screen">
+<div class="welcome-screen fade-in">
     <h1>مرحباً بك في شركتنا الهندسية</h1>
     <button id="enter-button">أعمالي</button>
 </div>
 
-<!-- صفحة إدارة البيوت والمصاريف -->
-<div class="container" id="main-container">
+<div class="container fade-in" id="main-container">
     <h1>إدارة البيوت والمصاريف</h1>
 
-    <!-- Form to add houses -->
     <form id="house-form">
         <label for="house-name">اسم البيت:</label>
         <input type="text" id="house-name" placeholder="أدخل اسم البيت" required>
         
-        <label for="house-expense">المصروف:</label>
+        <label for="house-expense">المصروف (بالدينار العراقي):</label>
         <input type="number" id="house-expense" placeholder="أدخل المصروف" required>
 
-        <button type="submit">إضافة البيت</button>
+        <button type="submit">إضافة البيت أو المصروف</button>
     </form>
 
-    <!-- Search Form -->
     <form id="search-form">
         <input type="text" id="search-input" placeholder="ابحث عن اسم البيت">
     </form>
 
-    <!-- List of houses -->
     <div class="house-list" id="house-list"></div>
 
-    <!-- House details -->
     <div class="house-details" id="house-details">
         <h2>تفاصيل البيت</h2>
         <p><strong>اسم البيت:</strong> <span id="detail-name"></span></p>
-        <p><strong>المصروف:</strong> <span id="detail-expense"></span> دينار عراقي</p>
+        <div id="expense-list"></div>
         <p><strong>تاريخ الإضافة:</strong> <span id="detail-date"></span></p>
+        <button id="add-expense-button">إضافة مصروف</button>
+        <button id="delete-button">حذف البيت</button>
+    </div>
+
+    <!-- نافذة منبثقة لإضافة مصروف -->
+    <div class="modal" id="add-expense-modal">
+        <div class="modal-content">
+            <h3>إضافة مصروف جديد</h3>
+            <label for="new-expense-amount">المبلغ:</label>
+            <input type="number" id="new-expense-amount" placeholder="أدخل المبلغ" required>
+            <button id="submit-new-expense">إضافة المصروف</button>
+            <button id="close-modal">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- نافذة منبثقة لتحديث المصروف -->
+    <div class="modal" id="update-expense-modal">
+        <div class="modal-content">
+            <h3>تحديث المصروف</h3>
+            <label for="update-expense-amount">المبلغ الجديد:</label>
+            <input type="number" id="update-expense-amount" placeholder="أدخل المبلغ الجديد" required>
+            <button id="submit-update-expense">تحديث المصروف</button>
+            <button id="close-update-modal">إغلاق</button>
+        </div>
     </div>
 </div>
 
@@ -197,80 +264,154 @@
 // إظهار الصفحة الرئيسية عند النقر على زر "أعمالي"
 document.getElementById('enter-button').addEventListener('click', function() {
     document.querySelector('.welcome-screen').style.display = 'none';
-    document.getElementById('main-container').style.display = 'block';
+    const mainContainer = document.getElementById('main-container');
+    mainContainer.classList.add('show');
 });
 
-// Array to store houses
-let houses = [];
+// Array to store houses (loaded from localStorage if available)
+let houses = JSON.parse(localStorage.getItem('houses')) || [];
+let currentExpenseIndex = -1; // لتتبع أي مصروف يتم تحديثه
 
-// Function to add a new house
-document.getElementById('house-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const name = document.getElementById('house-name').value;
-    const expense = document.getElementById('house-expense').value;
-    const dateAdded = new Date().toLocaleDateString();
-
-    if (name && expense) {
-        houses.push({ name, expense, dateAdded });
-        displayAllHouses(); // عرض كل البيوت دائمًا
-        document.getElementById('house-form').reset();
-    }
-});
-
-// Function to display all houses
-function displayAllHouses() {
+// Function to update the house list
+function updateHouseList() {
     const houseListDiv = document.getElementById('house-list');
-    houseListDiv.innerHTML = ''; // نعيد تعيين القائمة لعرض كل البيوت
-
-    houses.forEach((house) => {
+    houseListDiv.innerHTML = '';
+    houses.forEach((house, index) => {
         const houseDiv = document.createElement('div');
-        houseDiv.classList.add('house-item');
-        houseDiv.innerHTML = `<span>${house.name}</span><span>${house.expense} دينار عراقي</span>`;
-        
-        houseDiv.addEventListener('click', function() {
-            showHouseDetails(house);
-        });
-
-        houseListDiv.appendChild(houseDiv);
-    });
-}
-
-// Function to search houses
-document.getElementById('search-input').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const filteredHouses = houses.filter(house => house.name.toLowerCase().includes(searchTerm));
-    displaySearchedHouses(filteredHouses);
-});
-
-// Function to display searched houses without clearing all houses
-function displaySearchedHouses(filteredHouses) {
-    const houseListDiv = document.getElementById('house-list');
-    houseListDiv.innerHTML = ''; // نظهر فقط النتائج
-
-    filteredHouses.forEach((house) => {
-        const houseDiv = document.createElement('div');
-        houseDiv.classList.add('house-item');
-        houseDiv.innerHTML = `<span>${house.name}</span><span>${house.expense} دينار عراقي</span>`;
-        
-        houseDiv.addEventListener('click', function() {
-            showHouseDetails(house);
-        });
-
+        houseDiv.className = 'house-item';
+        houseDiv.textContent = house.name;
+        houseDiv.addEventListener('click', () => showHouseDetails(index));
         houseListDiv.appendChild(houseDiv);
     });
 }
 
 // Function to show house details
-function showHouseDetails(house) {
-    document.getElementById('detail-name').textContent = house.name;
-    document.getElementById('detail-expense').textContent = house.expense;
-    document.getElementById('detail-date').textContent = house.dateAdded;
-    
-    document.getElementById('house-details').style.display = 'block';
+function showHouseDetails(index) {
+    const houseDetailsDiv = document.getElementById('house-details');
+    const detailName = document.getElementById('detail-name');
+    const expenseList = document.getElementById('expense-list');
+    const detailDate = document.getElementById('detail-date');
+
+    detailName.textContent = houses[index].name;
+    detailDate.textContent = houses[index].date;
+    expenseList.innerHTML = '';
+
+    houses[index].expenses.forEach((expense, expenseIndex) => {
+        const expenseDiv = document.createElement('div');
+        expenseDiv.textContent = `المصروف: ${expense.amount} دينار`;
+        expenseDiv.className = 'expense-item';
+        expenseDiv.addEventListener('click', (event) => {
+            event.stopPropagation(); // لمنع إغلاق التفاصيل عند النقر
+            currentExpenseIndex = expenseIndex; // حفظ الفهرس الحالي للمصروف
+            document.getElementById('update-expense-amount').value = expense.amount; // تعيين القيمة الحالية في حقل التحديث
+            document.getElementById('update-expense-modal').style.display = 'flex';
+        });
+        expenseList.appendChild(expenseDiv);
+    });
+
+    // Display the house details
+    houseDetailsDiv.classList.add('show');
 }
 
-// Display all houses initially (for existing houses)
-displayAllHouses();
+// Adding house or expense
+document.getElementById('house-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const houseName = document.getElementById('house-name').value;
+    const houseExpense = parseFloat(document.getElementById('house-expense').value) || 0;
+
+    const existingHouse = houses.find(h => h.name === houseName);
+
+    if (existingHouse) {
+        existingHouse.expenses.push({ amount: houseExpense });
+        existingHouse.totalExpenses += houseExpense; // تحديث المصروفات الإجمالية
+        alert(`تم إضافة مصروف بقيمة ${houseExpense} دينار للبيت ${houseName}.`);
+    } else {
+        const newHouse = {
+            name: houseName,
+            date: new Date().toLocaleDateString(),
+            expenses: [{ amount: houseExpense }],
+            totalExpenses: houseExpense // تعيين المصروفات الإجمالية
+        };
+        houses.push(newHouse);
+        alert(`تم إضافة البيت ${houseName} مع مصروف أولي بقيمة ${houseExpense} دينار.`);
+    }
+
+    localStorage.setItem('houses', JSON.stringify(houses));
+    updateHouseList();
+    document.getElementById('house-name').value = '';
+    document.getElementById('house-expense').value = '';
+});
+
+// Searching houses
+document.getElementById('search-input').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const filteredHouses = houses.filter(house => house.name.toLowerCase().includes(searchTerm));
+    const houseListDiv = document.getElementById('house-list');
+    houseListDiv.innerHTML = '';
+    filteredHouses.forEach((house, index) => {
+        const houseDiv = document.createElement('div');
+        houseDiv.className = 'house-item';
+        houseDiv.textContent = house.name;
+        houseDiv.addEventListener('click', () => showHouseDetails(houses.indexOf(house)));
+        houseListDiv.appendChild(houseDiv);
+    });
+});
+
+// إضافة المصروف
+document.getElementById('add-expense-button').addEventListener('click', function() {
+    document.getElementById('add-expense-modal').style.display = 'flex';
+});
+
+// إضافة المصروف الجديد
+document.getElementById('submit-new-expense').addEventListener('click', function() {
+    const newExpenseAmount = parseFloat(document.getElementById('new-expense-amount').value);
+    const houseIndex = houses.findIndex(h => h.name === document.getElementById('detail-name').textContent);
+    if (houseIndex !== -1 && !isNaN(newExpenseAmount)) {
+        houses[houseIndex].expenses.push({ amount: newExpenseAmount });
+        houses[houseIndex].totalExpenses += newExpenseAmount; // تحديث المصروفات الإجمالية
+        localStorage.setItem('houses', JSON.stringify(houses));
+        updateHouseList(); // لتحديث القائمة بعد إضافة المصروف
+        document.getElementById('new-expense-amount').value = '';
+        document.getElementById('add-expense-modal').style.display = 'none';
+    } else {
+        alert('يرجى إدخال مبلغ صحيح');
+    }
+});
+
+// حذف البيت
+document.getElementById('delete-button').addEventListener('click', function() {
+    const houseIndex = houses.findIndex(h => h.name === document.getElementById('detail-name').textContent);
+    if (houseIndex !== -1) {
+        houses.splice(houseIndex, 1);
+        localStorage.setItem('houses', JSON.stringify(houses));
+        updateHouseList();
+        document.getElementById('house-details').classList.remove('show');
+        alert('تم حذف البيت بنجاح.');
+    }
+});
+
+// إغلاق النوافذ المنبثقة
+document.getElementById('close-modal').addEventListener('click', function() {
+    document.getElementById('add-expense-modal').style.display = 'none';
+});
+document.getElementById('close-update-modal').addEventListener('click', function() {
+    document.getElementById('update-expense-modal').style.display = 'none';
+});
+
+// تحديث المصروف
+document.getElementById('submit-update-expense').addEventListener('click', function() {
+    const updatedExpenseAmount = parseFloat(document.getElementById('update-expense-amount').value);
+    const houseIndex = houses.findIndex(h => h.name === document.getElementById('detail-name').textContent);
+    if (houseIndex !== -1 && !isNaN(updatedExpenseAmount) && currentExpenseIndex !== -1) {
+        houses[houseIndex].expenses[currentExpenseIndex].amount = updatedExpenseAmount; // تحديث المصروف
+        localStorage.setItem('houses', JSON.stringify(houses));
+        updateHouseList(); // لتحديث القائمة بعد التحديث
+        document.getElementById('update-expense-amount').value = '';
+        document.getElementById('update-expense-modal').style.display = 'none';
+    } else {
+        alert('يرجى إدخال مبلغ صحيح');
+    }
+});
 </script>
 
 </body>
