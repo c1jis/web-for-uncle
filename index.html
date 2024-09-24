@@ -231,8 +231,9 @@
     <div class="house-details" id="house-details">
         <h2>تفاصيل البيت</h2>
         <p><strong>اسم البيت:</strong> <span id="detail-name"></span></p>
-        <div id="expense-list"></div>
         <p><strong>تاريخ الإضافة:</strong> <span id="detail-date"></span></p>
+        <div id="expense-list"></div>
+        <p><strong>المجموع الكلي للمصاريف:</strong> <span id="total-expense">0</span> دينار عراقي</p>
         <button id="add-expense-button">إضافة مصروف</button>
         <button id="delete-button">حذف البيت</button>
     </div>
@@ -268,149 +269,157 @@ document.getElementById('enter-button').addEventListener('click', function() {
     mainContainer.classList.add('show');
 });
 
-// Array to store houses (loaded from localStorage if available)
-let houses = JSON.parse(localStorage.getItem('houses')) || [];
-let currentExpenseIndex = -1; // لتتبع أي مصروف يتم تحديثه
+// Array to store houses
+const houses = [];
 
-// Function to update the house list
-function updateHouseList() {
-    const houseListDiv = document.getElementById('house-list');
-    houseListDiv.innerHTML = '';
-    houses.forEach((house, index) => {
-        const houseDiv = document.createElement('div');
-        houseDiv.className = 'house-item';
-        houseDiv.textContent = house.name;
-        houseDiv.addEventListener('click', () => showHouseDetails(index));
-        houseListDiv.appendChild(houseDiv);
-    });
-}
-
-// Function to show house details
-function showHouseDetails(index) {
-    const houseDetailsDiv = document.getElementById('house-details');
-    const detailName = document.getElementById('detail-name');
-    const expenseList = document.getElementById('expense-list');
-    const detailDate = document.getElementById('detail-date');
-
-    detailName.textContent = houses[index].name;
-    detailDate.textContent = houses[index].date;
-    expenseList.innerHTML = '';
-
-    houses[index].expenses.forEach((expense, expenseIndex) => {
-        const expenseDiv = document.createElement('div');
-        expenseDiv.textContent = `المصروف: ${expense.amount} دينار`;
-        expenseDiv.className = 'expense-item';
-        expenseDiv.addEventListener('click', (event) => {
-            event.stopPropagation(); // لمنع إغلاق التفاصيل عند النقر
-            currentExpenseIndex = expenseIndex; // حفظ الفهرس الحالي للمصروف
-            document.getElementById('update-expense-amount').value = expense.amount; // تعيين القيمة الحالية في حقل التحديث
-            document.getElementById('update-expense-modal').style.display = 'flex';
-        });
-        expenseList.appendChild(expenseDiv);
-    });
-
-    // Display the house details
-    houseDetailsDiv.classList.add('show');
-}
-
-// Adding house or expense
-document.getElementById('house-form').addEventListener('submit', function(event) {
-    event.preventDefault();
+// Handle form submission to add house and expenses
+document.getElementById('house-form').addEventListener('submit', function(e) {
+    e.preventDefault();
     const houseName = document.getElementById('house-name').value;
-    const houseExpense = parseFloat(document.getElementById('house-expense').value) || 0;
+    const expenseAmount = parseFloat(document.getElementById('house-expense').value);
 
-    const existingHouse = houses.find(h => h.name === houseName);
-
+    // Check if house already exists
+    const existingHouse = houses.find(house => house.name === houseName);
     if (existingHouse) {
-        existingHouse.expenses.push({ amount: houseExpense });
-        existingHouse.totalExpenses += houseExpense; // تحديث المصروفات الإجمالية
-        alert(`تم إضافة مصروف بقيمة ${houseExpense} دينار للبيت ${houseName}.`);
-    } else {
-        const newHouse = {
-            name: houseName,
+        existingHouse.expenses.push({
+            amount: expenseAmount,
             date: new Date().toLocaleDateString(),
-            expenses: [{ amount: houseExpense }],
-            totalExpenses: houseExpense // تعيين المصروفات الإجمالية
-        };
-        houses.push(newHouse);
-        alert(`تم إضافة البيت ${houseName} مع مصروف أولي بقيمة ${houseExpense} دينار.`);
+            notes: ""
+        });
+    } else {
+        houses.push({
+            name: houseName,
+            expenses: [{
+                amount: expenseAmount,
+                date: new Date().toLocaleDateString(),
+                notes: ""
+            }]
+        });
     }
-
-    localStorage.setItem('houses', JSON.stringify(houses));
-    updateHouseList();
+    
     document.getElementById('house-name').value = '';
     document.getElementById('house-expense').value = '';
+    displayHouses();
 });
 
-// Searching houses
-document.getElementById('search-input').addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
-    const filteredHouses = houses.filter(house => house.name.toLowerCase().includes(searchTerm));
-    const houseListDiv = document.getElementById('house-list');
-    houseListDiv.innerHTML = '';
-    filteredHouses.forEach((house, index) => {
-        const houseDiv = document.createElement('div');
-        houseDiv.className = 'house-item';
-        houseDiv.textContent = house.name;
-        houseDiv.addEventListener('click', () => showHouseDetails(houses.indexOf(house)));
-        houseListDiv.appendChild(houseDiv);
+// Display houses
+function displayHouses() {
+    const houseList = document.getElementById('house-list');
+    houseList.innerHTML = '';
+    houses.forEach(house => {
+        const houseItem = document.createElement('div');
+        houseItem.className = 'house-item';
+        houseItem.textContent = house.name;
+        houseItem.addEventListener('click', () => showHouseDetails(house));
+        houseList.appendChild(houseItem);
     });
+}
+
+// Show house details
+function showHouseDetails(house) {
+    document.getElementById('detail-name').textContent = house.name;
+    document.getElementById('detail-date').textContent = house.expenses[0].date; // Show date of first expense
+    const expenseList = document.getElementById('expense-list');
+    expenseList.innerHTML = '';
+    let totalExpense = 0;
+
+    house.expenses.forEach((expense, index) => {
+        totalExpense += expense.amount;
+        const expenseItem = document.createElement('div');
+        expenseItem.innerHTML = `
+            <p><strong>المصروف:</strong> ${expense.amount} دينار عراقي | <strong>التاريخ:</strong> ${expense.date} 
+            | <strong>ملاحظات:</strong> ${expense.notes} 
+            <button onclick="editExpense(${houses.indexOf(house)}, ${index})">تحديث</button>
+            <button onclick="deleteExpense(${houses.indexOf(house)}, ${index})">حذف</button></p>`;
+        expenseList.appendChild(expenseItem);
+    });
+
+    document.getElementById('total-expense').textContent = totalExpense;
+    document.getElementById('house-details').classList.add('show');
+}
+
+// Function to delete a house
+document.getElementById('delete-button').addEventListener('click', function() {
+    const houseName = document.getElementById('detail-name').textContent;
+    const index = houses.findIndex(house => house.name === houseName);
+    if (index > -1) {
+        houses.splice(index, 1);
+        document.getElementById('house-details').classList.remove('show');
+        displayHouses();
+    }
 });
 
-// إضافة المصروف
+// Function to delete an expense
+function deleteExpense(houseIndex, expenseIndex) {
+    houses[houseIndex].expenses.splice(expenseIndex, 1);
+    displayHouses();
+    showHouseDetails(houses[houseIndex]); // Refresh details
+}
+
+// Function to edit an expense
+function editExpense(houseIndex, expenseIndex) {
+    const expense = houses[houseIndex].expenses[expenseIndex];
+    document.getElementById('update-expense-amount').value = expense.amount;
+    document.getElementById('submit-update-expense').onclick = function() {
+        const newAmount = parseFloat(document.getElementById('update-expense-amount').value);
+        houses[houseIndex].expenses[expenseIndex].amount = newAmount;
+        houses[houseIndex].expenses[expenseIndex].notes = prompt("أدخل الملاحظات:") || "";
+        document.getElementById('update-expense-modal').style.display = 'none';
+        displayHouses();
+        showHouseDetails(houses[houseIndex]); // Refresh details
+    };
+    document.getElementById('update-expense-modal').style.display = 'flex';
+}
+
+// Function to close modal
+document.getElementById('close-update-modal').onclick = function() {
+    document.getElementById('update-expense-modal').style.display = 'none';
+};
+
+// Adding expense modal
 document.getElementById('add-expense-button').addEventListener('click', function() {
     document.getElementById('add-expense-modal').style.display = 'flex';
 });
 
-// إضافة المصروف الجديد
+// Add new expense to the house
 document.getElementById('submit-new-expense').addEventListener('click', function() {
+    const houseName = document.getElementById('detail-name').textContent;
+    const house = houses.find(h => h.name === houseName);
     const newExpenseAmount = parseFloat(document.getElementById('new-expense-amount').value);
-    const houseIndex = houses.findIndex(h => h.name === document.getElementById('detail-name').textContent);
-    if (houseIndex !== -1 && !isNaN(newExpenseAmount)) {
-        houses[houseIndex].expenses.push({ amount: newExpenseAmount });
-        houses[houseIndex].totalExpenses += newExpenseAmount; // تحديث المصروفات الإجمالية
-        localStorage.setItem('houses', JSON.stringify(houses));
-        updateHouseList(); // لتحديث القائمة بعد إضافة المصروف
-        document.getElementById('new-expense-amount').value = '';
-        document.getElementById('add-expense-modal').style.display = 'none';
-    } else {
-        alert('يرجى إدخال مبلغ صحيح');
-    }
-});
+    const notes = prompt("أدخل الملاحظات:") || "";
 
-// حذف البيت
-document.getElementById('delete-button').addEventListener('click', function() {
-    const houseIndex = houses.findIndex(h => h.name === document.getElementById('detail-name').textContent);
-    if (houseIndex !== -1) {
-        houses.splice(houseIndex, 1);
-        localStorage.setItem('houses', JSON.stringify(houses));
-        updateHouseList();
-        document.getElementById('house-details').classList.remove('show');
-        alert('تم حذف البيت بنجاح.');
+    if (house) {
+        house.expenses.push({
+            amount: newExpenseAmount,
+            date: new Date().toLocaleDateString(),
+            notes: notes
+        });
     }
-});
-
-// إغلاق النوافذ المنبثقة
-document.getElementById('close-modal').addEventListener('click', function() {
+    document.getElementById('new-expense-amount').value = '';
     document.getElementById('add-expense-modal').style.display = 'none';
-});
-document.getElementById('close-update-modal').addEventListener('click', function() {
-    document.getElementById('update-expense-modal').style.display = 'none';
+    displayHouses();
+    showHouseDetails(house); // Refresh details
 });
 
-// تحديث المصروف
-document.getElementById('submit-update-expense').addEventListener('click', function() {
-    const updatedExpenseAmount = parseFloat(document.getElementById('update-expense-amount').value);
-    const houseIndex = houses.findIndex(h => h.name === document.getElementById('detail-name').textContent);
-    if (houseIndex !== -1 && !isNaN(updatedExpenseAmount) && currentExpenseIndex !== -1) {
-        houses[houseIndex].expenses[currentExpenseIndex].amount = updatedExpenseAmount; // تحديث المصروف
-        localStorage.setItem('houses', JSON.stringify(houses));
-        updateHouseList(); // لتحديث القائمة بعد التحديث
-        document.getElementById('update-expense-amount').value = '';
-        document.getElementById('update-expense-modal').style.display = 'none';
-    } else {
-        alert('يرجى إدخال مبلغ صحيح');
-    }
+// Close the add expense modal
+document.getElementById('close-modal').onclick = function() {
+    document.getElementById('add-expense-modal').style.display = 'none';
+};
+
+// Search functionality
+document.getElementById('search-input').addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    const filteredHouses = houses.filter(house => house.name.toLowerCase().includes(query));
+    
+    const houseList = document.getElementById('house-list');
+    houseList.innerHTML = '';
+    filteredHouses.forEach(house => {
+        const houseItem = document.createElement('div');
+        houseItem.className = 'house-item';
+        houseItem.textContent = house.name;
+        houseItem.addEventListener('click', () => showHouseDetails(house));
+        houseList.appendChild(houseItem);
+    });
 });
 </script>
 
