@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>شركة هندسية - إدارة البيوت والمصاريف</title>
     <style>
+        /* Styles كما في الكود الأصلي */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -200,6 +201,7 @@
             }
         }
 
+
     </style>
 </head>
 <body>
@@ -269,8 +271,8 @@ document.getElementById('enter-button').addEventListener('click', function() {
     mainContainer.classList.add('show');
 });
 
-// Array to store houses
-const houses = [];
+// Array to store houses from Local Storage
+let houses = JSON.parse(localStorage.getItem('houses')) || [];
 
 // Handle form submission to add house and expenses
 document.getElementById('house-form').addEventListener('submit', function(e) {
@@ -296,6 +298,9 @@ document.getElementById('house-form').addEventListener('submit', function(e) {
             }]
         });
     }
+
+    // Save updated houses to Local Storage
+    localStorage.setItem('houses', JSON.stringify(houses));
     
     document.getElementById('house-name').value = '';
     document.getElementById('house-expense').value = '';
@@ -345,6 +350,7 @@ document.getElementById('delete-button').addEventListener('click', function() {
     if (index > -1) {
         houses.splice(index, 1);
         document.getElementById('house-details').classList.remove('show');
+        localStorage.setItem('houses', JSON.stringify(houses)); // Update Local Storage
         displayHouses();
     }
 });
@@ -352,6 +358,7 @@ document.getElementById('delete-button').addEventListener('click', function() {
 // Function to delete an expense
 function deleteExpense(houseIndex, expenseIndex) {
     houses[houseIndex].expenses.splice(expenseIndex, 1);
+    localStorage.setItem('houses', JSON.stringify(houses)); // Update Local Storage
     displayHouses();
     showHouseDetails(houses[houseIndex]); // Refresh details
 }
@@ -364,64 +371,15 @@ function editExpense(houseIndex, expenseIndex) {
         const newAmount = parseFloat(document.getElementById('update-expense-amount').value);
         houses[houseIndex].expenses[expenseIndex].amount = newAmount;
         houses[houseIndex].expenses[expenseIndex].notes = prompt("أدخل الملاحظات:") || "";
+        localStorage.setItem('houses', JSON.stringify(houses)); // Update Local Storage
         document.getElementById('update-expense-modal').style.display = 'none';
-        displayHouses();
         showHouseDetails(houses[houseIndex]); // Refresh details
     };
     document.getElementById('update-expense-modal').style.display = 'flex';
 }
 
-// Function to close modal
-document.getElementById('close-update-modal').onclick = function() {
-    document.getElementById('update-expense-modal').style.display = 'none';
-};
-
-// Adding expense modal
-document.getElementById('add-expense-button').addEventListener('click', function() {
-    document.getElementById('add-expense-modal').style.display = 'flex';
-});
-
-// Add new expense to the house
-document.getElementById('submit-new-expense').addEventListener('click', function() {
-    const houseName = document.getElementById('detail-name').textContent;
-    const house = houses.find(h => h.name === houseName);
-    const newExpenseAmount = parseFloat(document.getElementById('new-expense-amount').value);
-    const notes = prompt("أدخل الملاحظات:") || "";
-
-    if (house) {
-        house.expenses.push({
-            amount: newExpenseAmount,
-            date: new Date().toLocaleDateString(),
-            notes: notes
-        });
-    }
-    document.getElementById('new-expense-amount').value = '';
-    document.getElementById('add-expense-modal').style.display = 'none';
-    displayHouses();
-    showHouseDetails(house); // Refresh details
-});
-
-// Close the add expense modal
-document.getElementById('close-modal').onclick = function() {
-    document.getElementById('add-expense-modal').style.display = 'none';
-};
-
-// Search functionality
-document.getElementById('search-input').addEventListener('input', function(e) {
-    const query = e.target.value.toLowerCase();
-    const filteredHouses = houses.filter(house => house.name.toLowerCase().includes(query));
-    
-    const houseList = document.getElementById('house-list');
-    houseList.innerHTML = '';
-    filteredHouses.forEach(house => {
-        const houseItem = document.createElement('div');
-        houseItem.className = 'house-item';
-        houseItem.textContent = house.name;
-        houseItem.addEventListener('click', () => showHouseDetails(house));
-        houseList.appendChild(houseItem);
-    });
-});
+// Initial display of houses
+displayHouses();
 </script>
-
 </body>
 </html>
