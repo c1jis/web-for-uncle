@@ -200,8 +200,6 @@
                 opacity: 1;
             }
         }
-
-
     </style>
 </head>
 <body>
@@ -265,121 +263,158 @@
 
 <script>
 // إظهار الصفحة الرئيسية عند النقر على زر "أعمالي"
-document.getElementById('enter-button').addEventListener('click', function() {
+document.getElementById('enter-button').onclick = function() {
     document.querySelector('.welcome-screen').style.display = 'none';
-    const mainContainer = document.getElementById('main-container');
-    mainContainer.classList.add('show');
-});
+    document.getElementById('main-container').classList.add('show');
+};
 
-// Array to store houses from Local Storage
-let houses = JSON.parse(localStorage.getItem('houses')) || [];
+// تخزين البيانات
+const houses = JSON.parse(localStorage.getItem('houses')) || [];
 
-// Handle form submission to add house and expenses
-document.getElementById('house-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const houseName = document.getElementById('house-name').value;
-    const expenseAmount = parseFloat(document.getElementById('house-expense').value);
-
-    // Check if house already exists
-    const existingHouse = houses.find(house => house.name === houseName);
-    if (existingHouse) {
-        existingHouse.expenses.push({
-            amount: expenseAmount,
-            date: new Date().toLocaleDateString(),
-            notes: ""
-        });
-    } else {
-        houses.push({
-            name: houseName,
-            expenses: [{
-                amount: expenseAmount,
-                date: new Date().toLocaleDateString(),
-                notes: ""
-            }]
-        });
-    }
-
-    // Save updated houses to Local Storage
-    localStorage.setItem('houses', JSON.stringify(houses));
-    
-    document.getElementById('house-name').value = '';
-    document.getElementById('house-expense').value = '';
-    displayHouses();
-});
-
-// Display houses
-function displayHouses() {
-    const houseList = document.getElementById('house-list');
-    houseList.innerHTML = '';
-    houses.forEach(house => {
+// تحديث واجهة المستخدم
+function updateHouseList() {
+    const houseListElement = document.getElementById('house-list');
+    houseListElement.innerHTML = '';
+    houses.forEach((house, index) => {
         const houseItem = document.createElement('div');
         houseItem.className = 'house-item';
-        houseItem.textContent = house.name;
-        houseItem.addEventListener('click', () => showHouseDetails(house));
-        houseList.appendChild(houseItem);
+        houseItem.innerText = house.name;
+        houseItem.onclick = function() {
+            showHouseDetails(index);
+        };
+        houseListElement.appendChild(houseItem);
     });
 }
 
-// Show house details
-function showHouseDetails(house) {
-    document.getElementById('detail-name').textContent = house.name;
-    document.getElementById('detail-date').textContent = house.expenses[0].date; // Show date of first expense
-    const expenseList = document.getElementById('expense-list');
-    expenseList.innerHTML = '';
-    let totalExpense = 0;
+// إظهار تفاصيل البيت
+function showHouseDetails(index) {
+    const house = houses[index];
+    document.getElementById('detail-name').innerText = house.name;
+    document.getElementById('detail-date').innerText = house.date;
+    document.getElementById('expense-list').innerHTML = '';
 
-    house.expenses.forEach((expense, index) => {
-        totalExpense += expense.amount;
+    let totalExpense = 0;
+    house.expenses.forEach((expense, expenseIndex) => {
         const expenseItem = document.createElement('div');
-        expenseItem.innerHTML = `
-            <p><strong>المصروف:</strong> ${expense.amount} دينار عراقي | <strong>التاريخ:</strong> ${expense.date} 
-            | <strong>ملاحظات:</strong> ${expense.notes} 
-            <button onclick="editExpense(${houses.indexOf(house)}, ${index})">تحديث</button>
-            <button onclick="deleteExpense(${houses.indexOf(house)}, ${index})">حذف</button></p>`;
-        expenseList.appendChild(expenseItem);
+        expenseItem.innerText = `${expense.amount} دينار عراقي`;
+        const updateButton = document.createElement('button');
+        updateButton.innerText = 'تحديث';
+        updateButton.onclick = function() {
+            showUpdateExpenseModal(expenseIndex, index);
+        };
+        const deleteButton = document.createElement('button');
+        deleteButton.innerText = 'حذف';
+        deleteButton.onclick = function() {
+            deleteExpense(expenseIndex, index);
+        };
+        expenseItem.appendChild(updateButton);
+        expenseItem.appendChild(deleteButton);
+        document.getElementById('expense-list').appendChild(expenseItem);
+        totalExpense += expense.amount;
     });
 
-    document.getElementById('total-expense').textContent = totalExpense;
+    document.getElementById('total-expense').innerText = totalExpense;
     document.getElementById('house-details').classList.add('show');
 }
 
-// Function to delete a house
-document.getElementById('delete-button').addEventListener('click', function() {
-    const houseName = document.getElementById('detail-name').textContent;
-    const index = houses.findIndex(house => house.name === houseName);
-    if (index > -1) {
-        houses.splice(index, 1);
-        document.getElementById('house-details').classList.remove('show');
-        localStorage.setItem('houses', JSON.stringify(houses)); // Update Local Storage
-        displayHouses();
-    }
-});
-
-// Function to delete an expense
-function deleteExpense(houseIndex, expenseIndex) {
-    houses[houseIndex].expenses.splice(expenseIndex, 1);
-    localStorage.setItem('houses', JSON.stringify(houses)); // Update Local Storage
-    displayHouses();
-    showHouseDetails(houses[houseIndex]); // Refresh details
-}
-
-// Function to edit an expense
-function editExpense(houseIndex, expenseIndex) {
-    const expense = houses[houseIndex].expenses[expenseIndex];
-    document.getElementById('update-expense-amount').value = expense.amount;
-    document.getElementById('submit-update-expense').onclick = function() {
-        const newAmount = parseFloat(document.getElementById('update-expense-amount').value);
-        houses[houseIndex].expenses[expenseIndex].amount = newAmount;
-        houses[houseIndex].expenses[expenseIndex].notes = prompt("أدخل الملاحظات:") || "";
-        localStorage.setItem('houses', JSON.stringify(houses)); // Update Local Storage
-        document.getElementById('update-expense-modal').style.display = 'none';
-        showHouseDetails(houses[houseIndex]); // Refresh details
+// إضافة بيت ومصاريف
+document.getElementById('house-form').onsubmit = function(e) {
+    e.preventDefault();
+    const houseName = document.getElementById('house-name').value;
+    const houseExpense = parseInt(document.getElementById('house-expense').value, 10);
+    
+    const newHouse = {
+        name: houseName,
+        date: new Date().toLocaleDateString(),
+        expenses: [{ amount: houseExpense }]
     };
+
+    houses.push(newHouse);
+    localStorage.setItem('houses', JSON.stringify(houses));
+    updateHouseList();
+
+    // إعادة تعيين الحقول
+    document.getElementById('house-name').value = '';
+    document.getElementById('house-expense').value = '';
+};
+
+// البحث عن بيت
+document.getElementById('search-input').oninput = function() {
+    const query = this.value.toLowerCase();
+    const filteredHouses = houses.filter(house => house.name.toLowerCase().includes(query));
+    const houseListElement = document.getElementById('house-list');
+    houseListElement.innerHTML = '';
+
+    filteredHouses.forEach((house, index) => {
+        const houseItem = document.createElement('div');
+        houseItem.className = 'house-item';
+        houseItem.innerText = house.name;
+        houseItem.onclick = function() {
+            showHouseDetails(houses.indexOf(house));
+        };
+        houseListElement.appendChild(houseItem);
+    });
+};
+
+// إضافة مصروف
+document.getElementById('add-expense-button').onclick = function() {
+    document.getElementById('add-expense-modal').style.display = 'flex';
+};
+
+// إغلاق نافذة إضافة مصروف
+document.getElementById('close-modal').onclick = function() {
+    document.getElementById('add-expense-modal').style.display = 'none';
+};
+
+// إرسال مصروف جديد
+document.getElementById('submit-new-expense').onclick = function() {
+    const expenseAmount = parseInt(document.getElementById('new-expense-amount').value, 10);
+    const houseIndex = houses.findIndex(house => house.name === document.getElementById('detail-name').innerText);
+    houses[houseIndex].expenses.push({ amount: expenseAmount });
+    localStorage.setItem('houses', JSON.stringify(houses));
+    showHouseDetails(houseIndex);
+    document.getElementById('new-expense-amount').value = '';
+    document.getElementById('add-expense-modal').style.display = 'none';
+};
+
+// حذف بيت
+document.getElementById('delete-button').onclick = function() {
+    const houseName = document.getElementById('detail-name').innerText;
+    const houseIndex = houses.findIndex(house => house.name === houseName);
+    houses.splice(houseIndex, 1);
+    localStorage.setItem('houses', JSON.stringify(houses));
+    document.getElementById('house-details').classList.remove('show');
+    updateHouseList();
+};
+
+// إظهار نافذة تحديث المصروف
+function showUpdateExpenseModal(expenseIndex, houseIndex) {
     document.getElementById('update-expense-modal').style.display = 'flex';
+    const expenseAmount = houses[houseIndex].expenses[expenseIndex].amount;
+    document.getElementById('update-expense-amount').value = expenseAmount;
+    document.getElementById('submit-update-expense').onclick = function() {
+        const newExpenseAmount = parseInt(document.getElementById('update-expense-amount').value, 10);
+        houses[houseIndex].expenses[expenseIndex].amount = newExpenseAmount;
+        localStorage.setItem('houses', JSON.stringify(houses));
+        showHouseDetails(houseIndex);
+        document.getElementById('update-expense-modal').style.display = 'none';
+    };
 }
 
-// Initial display of houses
-displayHouses();
+// حذف مصروف
+function deleteExpense(expenseIndex, houseIndex) {
+    houses[houseIndex].expenses.splice(expenseIndex, 1);
+    localStorage.setItem('houses', JSON.stringify(houses));
+    showHouseDetails(houseIndex);
+}
+
+// إغلاق نافذة تحديث المصروف
+document.getElementById('close-update-modal').onclick = function() {
+    document.getElementById('update-expense-modal').style.display = 'none';
+};
+
+updateHouseList();
 </script>
+
 </body>
 </html>
